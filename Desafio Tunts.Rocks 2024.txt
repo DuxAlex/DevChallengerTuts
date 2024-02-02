@@ -70,22 +70,20 @@ Calcular a situação de cada aluno baseado na média das 3 provas (P1, P2 e P3)
 
 Média (m) Situação:
 
-m<5  - Reprovado por Nota
+m<50  - Reprovado por Nota
 
-5<=m<7  - Exame Final
+50<=m<70  - Exame Final
 
-m>=7  - Aprovado
+m>=70  - Aprovado
 
 
 
 Caso o número de faltas ultrapasse 25% do número total de aulas o aluno terá a situação  "Reprovado por Falta", independente da média. 
-NUMERO TOTAL DE AULAS 60. 25% DE 60 = 15 AULAS.
-SE FALTAS > 15 = "Reprovado por Falta" .
  Caso a situação seja "Exame Final" é necessário calcular a "Nota para Aprovação Final"(naf) de  cada aluno de acordo com seguinte fórmula: 
 
 
 
-5 <= (m + naf)/2
+50 <= (m + naf)/2
 
 
 

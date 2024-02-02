@@ -25,7 +25,7 @@ async function retrieveData(googleSheets, spreadsheetId, range) {
 
 function processStudentData(data) {
   if (!Array.isArray(data)) {
-    console.error("Data is not an array");
+    console.error('Data is not an array');
     return [];
   }
 
@@ -35,6 +35,7 @@ function processStudentData(data) {
     const maxFaltas = totalAulas * 0.25;
 
     if (faltas > maxFaltas) {
+      console.log(`${aluno} foi reprovado por falta.`);
       return [...row, "Reprovado por Falta", 0];
     }
 
@@ -42,13 +43,16 @@ function processStudentData(data) {
     let situation = "";
     let naf = 0;
 
-    if (average < 5) {
+    if (average < 50) {
       situation = "Reprovado por Nota";
-    } else if (average >= 5 && average < 7) {
+      console.log(`${aluno} foi reprovado por nota.`);
+    } else if (average >= 50 && average < 70) {
       situation = "Exame Final";
-      naf = math.ceil(10 - average); // Calculate NAF, rounded up
+      naf = Math.ceil((100 - average) * 2); // Calculate NAF, rounded up
+      console.log(`${aluno} está de exame final e precisa de uma nota ${naf} para ser aprovado.`);
     } else {
       situation = "Aprovado";
+      console.log(`${aluno} foi aprovado.`);
     }
 
     return [...row, situation, naf];
@@ -56,6 +60,7 @@ function processStudentData(data) {
 
   return processedData;
 }
+
 
 async function updateGoogleSheet(googleSheets, spreadsheetId, range, values) {
   await googleSheets.spreadsheets.values.update({
