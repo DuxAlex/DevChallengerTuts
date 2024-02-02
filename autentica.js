@@ -1,4 +1,8 @@
 const { google } = require("googleapis");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
 
 async function getAuthSheets() {
   const auth = new google.auth.GoogleAuth({

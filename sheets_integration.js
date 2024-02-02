@@ -15,82 +15,75 @@ async function configureGoogleSheetsAPI() {
   return googleSheets;
 }
 
+async function retrieveData(googleSheets, spreadsheetId, range) {
+  const response = await googleSheets.spreadsheets.values.get({
+    spreadsheetId,
+    range,
+  });
+  return response.data.values;
+}
+
+function processStudentData(data) {
+  if (!Array.isArray(data)) {
+    console.error("Data is not an array");
+    return [];
+  }
+
+  const processedData = data.map((row) => {
+    const [matricula, aluno, faltas, p1, p2, p3] = row;
+    const totalAulas = 60;
+    const maxFaltas = totalAulas * 0.25;
+
+    if (faltas > maxFaltas) {
+      return [...row, "Reprovado por Falta", 0];
+    }
+
+    const average = math.mean([parseFloat(p1), parseFloat(p2), parseFloat(p3)]);
+    let situation = "";
+    let naf = 0;
+
+    if (average < 5) {
+      situation = "Reprovado por Nota";
+    } else if (average >= 5 && average < 7) {
+      situation = "Exame Final";
+      naf = math.ceil(10 - average); // Calculate NAF, rounded up
+    } else {
+      situation = "Aprovado";
+    }
+
+    return [...row, situation, naf];
+  });
+
+  return processedData;
+}
+
+async function updateGoogleSheet(googleSheets, spreadsheetId, range, values) {
+  await googleSheets.spreadsheets.values.update({
+    spreadsheetId,
+    range,
+    valueInputOption: "USER_ENTERED",
+    resource: {
+      values,
+    },
+  });
+}
+
 async function main() {
   const googleSheets = await configureGoogleSheetsAPI();
+  const spreadsheetId = "1sx0cH1gsTob6eOlfzftLg_x15thAmKgBKv-kn_IfIME";
+  const range = "engenharia_de_software!A4:F27"
 
-  async function retrieveData(googleSheets, spreadsheetId, range) {
-    const response = await googleSheets.spreadsheets.values.get({
-      spreadsheetId,
-      range,
-    });
-    return response.data.values;
-  }
+  const data = await retrieveData(googleSheets, spreadsheetId, range);
 
-  function processStudentData(data) {
-    const processedData = data.map((row) => {
-      const [matricula, aluno, faltas, p1, p2, p3] = row;
-      const totalAulas = 100; // Assuming total number of classes
-      const maxFaltas = totalAulas * 0.25;
+  const processedData = processStudentData(data);
 
-      if (faltas > maxFaltas) {
-        return [...row, "Reprovado por Falta", 0];
-      }
-
-      const average = math.mean([
-        parseFloat(p1),
-        parseFloat(p2),
-        parseFloat(p3),
-      ]);
-      let situation = "";
-      let naf = 0;
-
-      if (average < 5) {
-        situation = "Reprovado por Nota";
-      } else if (average >= 5 && average < 7) {
-        situation = "Exame Final";
-        naf = math.ceil(10 - average); // Calculate NAF, rounded up
-      } else {
-        situation = "Aprovado";
-      }
-
-      return [...row, situation, naf];
-    });
-
-    return processedData;
-  }
-
-  async function updateGoogleSheet(googleSheets, spreadsheetId, range, values) {
-    await googleSheets.spreadsheets.values.update({
-      spreadsheetId,
-      range,
-      valueInputOption: "USER_ENTERED",
-      resource: {
-        values,
-      },
-    });
-  }
-
-  async function main() {
-    const googleSheets = await configureGoogleSheetsAPI();
-    const spreadsheetId = "1sx0cH1gsTob6eOlfzftLg_x15thAmKgBKv-kn_IfIME"; // Replace with your spreadsheet ID
-    const range = "engenharia_de_software"; // Replace with your actual range
-
-    // Retrieve data
-    const data = await retrieveData(googleSheets, spreadsheetId, range);
-
-    // Process data
-    const processedData = processStudentData(data);
-
-    // Update Google Sheet
-    const updateRange = `${range}!A4:H${processedData.length + 1}`; // Adjust range based on processed data
-    await updateGoogleSheet(
-      googleSheets,
-      spreadsheetId,
-      updateRange,
-      processedData
-    );
-  }
-
+  const updateRange = `engenharia_de_software!A4:H27${processedData.length + 1}`; // Adjust this to match the range of the original data
+  await updateGoogleSheet(
+    googleSheets,
+    spreadsheetId,
+    updateRange,
+    processedData
+  );
 }
+
 main().catch(console.error);
-//main().then((resultado) => { console.log(resultado); }).catch((erro) => { console.error(erro); });

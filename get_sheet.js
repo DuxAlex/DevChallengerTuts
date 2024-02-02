@@ -1,4 +1,4 @@
-const getAuthSheets = require("./autentica");
+const getAuthSheets = require("./autentica.js");
 
 async function main(){
     const {googleSheets,auth,spreadsheetId} = await getAuthSheets();
