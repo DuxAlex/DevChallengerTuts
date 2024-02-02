@@ -1,0 +1,7 @@
+npm -y init 
+npm install googleapis dotenv mathjs
+
+link da planilha https://docs.google.com/spreadsheets/d/1sx0cH1gsTob6eOlfzftLg_x15thAmKgBKv-kn_IfIME/edit#gid=0
+
+email planilha-acesso@automacao-planilhas-412500.iam.gserviceaccount.com
+
